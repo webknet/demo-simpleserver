@@ -58,6 +58,8 @@
 
 <script>
     import api from '@/api'
+    import { mapActions } from 'vuex'
+
     export default {
         props: {
             close: Function
@@ -78,11 +80,21 @@
             errorText: ''
         }),
         methods: {
+            ...mapActions({
+                setUser: 'login'
+            }),
             submit() {
                 this.error = false
                 if (this.$refs.form.validate()) {
-                    api.register(this.user)
+                    const _user = {
+                        collection: {
+                            action: 'insert'
+                        },
+                        value: { ...this.user }
+                    }
+                    api.register(_user)
                         .then( result =>{
+                            this.setUser(result.data)
                             this.close()
                             console.log(result)})
                         .catch(error =>{ 

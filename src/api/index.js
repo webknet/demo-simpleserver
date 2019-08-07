@@ -1,6 +1,6 @@
 import Axios from 'axios'
 
-Axios.defaults.baseURL = 'http://localhost:3000'
+Axios.defaults.baseURL = 'https://simple-mongodb-server.herokuapp.com/'
 
 Axios.interceptors.request.use( config => {
     config.headers = {
@@ -16,7 +16,7 @@ Axios.interceptors.response
         if (token != null && token != '') {
             sessionStorage['token'] = token;
         } else {
-            //router.push('/login')
+            // ...to login
         }    
         return response;
     }, error => {
@@ -24,7 +24,8 @@ Axios.interceptors.response
         return Promise.reject(error)
     });
 
-const dbName = 'tmp' 
+// the name to your database
+const dbName = 'demo'  
 
 //establishes connection database
 Axios
@@ -33,21 +34,16 @@ Axios
 
 export default {
     register(user) {
-        return Axios
-                .post('/users', JSON.stringify({
-                        entity: {
-                            action: 'insert'
-                        },
-                        value: { 
-                            name: user.name,
-                            email: user.email,
-                            password: user.password
-                        }
-                    }))
+        return Axios.post('/users', JSON.stringify(user))
             
     },
     signin(user) {
-        return Axios
-                .post('/users/auth', JSON.stringify(user))
-    }
+        return Axios.post('/users/auth', JSON.stringify(user))
+    },
+    saveChanges(data) {
+        return Axios.post('/api', JSON.stringify(data))
+    },
+    query(data) {
+        return Axios.post('/api', JSON.stringify(data))
+    }   
 }
