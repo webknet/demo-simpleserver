@@ -1,6 +1,7 @@
 import Axios from 'axios'
 
-Axios.defaults.baseURL = 'https://simple-mongodb-server.herokuapp.com/'
+//Axios.defaults.baseURL = 'https://simple-mongodb-server.herokuapp.com/'
+Axios.defaults.baseURL = 'http://localhost:3000'
 
 Axios.interceptors.request.use( config => {
     config.headers = {
@@ -25,7 +26,7 @@ Axios.interceptors.response
     });
 
 // the name to your database
-const dbName = 'demo'  
+const dbName = 'sample_airbnb'  
 
 //establishes connection database
 Axios

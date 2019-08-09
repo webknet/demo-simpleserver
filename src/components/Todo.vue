@@ -1,10 +1,11 @@
 <template>
-    <v-container grid-list-xs>
+    <v-container class="mt-5" grid-list-xs>
         <v-toolbar color="primary" dark>
             <v-toolbar-title>TODO</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn icon><v-icon>list</v-icon></v-btn>
-            <v-btn icon><v-icon>apps</v-icon></v-btn>
+            <v-btn icon to="list" @click="showList = true"><v-icon>list</v-icon></v-btn>
+            <v-btn icon to="cards" @click="showList = false"><v-icon>apps</v-icon></v-btn>
+            
         </v-toolbar>
         <div class="pa-3">
             <h2>{{ today.toDateString() }}</h2>
@@ -23,16 +24,16 @@
                 ></v-text-field>
             </v-card-text>            
         </v-card>
-        <v-list class="mt-5">
-            <v-toolbar  >
+        <v-toolbar  class="mt-5" >
                 <v-toolbar-title>Your Tasks</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <span class="title grey--text">{{ tasks.length }} tasks</span>
                <div><span class="caption">&nbsp; {{ done }} completed</span></div>              
             </v-toolbar>
             <v-progress-linear :value="completed" ></v-progress-linear>
+        <v-list v-if="showList">           
             <template v-for="(item, index) in tasks">
-                <v-list-item :key="index">
+                <v-list-item :key="index" @click="update(item)">
                     <v-list-item-action>
                         <v-checkbox v-model="item.done" @change="update(item)" ></v-checkbox>                            
                     </v-list-item-action>
@@ -50,6 +51,34 @@
                 <v-divider v-if="index + 1 < tasks.length" :key="index+item"></v-divider>
             </template>            
         </v-list>
+        <v-layout v-else row wrap>
+             <template v-for="(item, index) in tasks">
+            <v-flex xs12 md6 xl4 :key="index">
+               <v-card class="ma-3 pa-2"   >
+                   <v-toolbar color="info" dark>
+                       <v-icon large>assignment</v-icon>
+                       <v-toolbar-title>
+                            <span class=" font-weight-light">Task</span>
+                       </v-toolbar-title>
+
+                   </v-toolbar>
+                                 
+                   <v-card-text class="headline font-weight-bold">
+                        <div class="grey--text font-weight-light caption">Added on: {{ new Date(item.date).toDateString() }}</div>
+                       <span :class="{ done: item.done }">{{item.description}}</span> 
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-btn icon @click="update(item)" color="orange">
+                            <v-icon>{{item.done ? 'done': 'crop_square'}}</v-icon>
+                            done
+                        </v-btn>
+                        <v-spacer></v-spacer>
+                        <v-btn v-if="item.done" icon @click="remove(item)"><v-icon color="red">clear</v-icon></v-btn>
+                    </v-card-actions>
+               </v-card> 
+            </v-flex>
+             </template>
+        </v-layout>
         <v-snackbar
             v-model="snackbar"
             color="error"
@@ -79,7 +108,8 @@
             today: new Date(),
             check: true,
             snackbar: false,
-            snackbarText: ''
+            snackbarText: '',
+            showList: true,
         }),
         computed: {
             completed() {
@@ -107,11 +137,11 @@
                     .then( res => {
                             this.tasks.push(res.data.ops[0])
                             this.task = ''
-                            console.log(res)
                         })
                     .catch(error => console.log(error.response))
             },
             update(task) {
+                task.done = !task.done
                 const _task ={
                     collection: {
                         name: `todo ${ this.$store.state.user._id}`,
@@ -142,7 +172,6 @@
                     
                     this.snackbarText = _task.description
                     this.snackbar = true
-                    console.log(res)
                 })
             }
         },
@@ -153,13 +182,15 @@
                     action: 'query',
                     query: 'Many',
                     fields: ''
-                }
+                },
+                value:{}
             })
             .then( res => { 
-                    this.tasks = res.data
-                    console.log(res.data)
+                    this.tasks = res.data.result
                 })
             .catch( error => console.log(error.response))
+
+            this.showList = this.$route.fullPath != '/list' ? false : true
         }
 
     }
